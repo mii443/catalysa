@@ -1,6 +1,6 @@
-use nom::{IResult, branch::alt, bytes::complete::tag, character::complete::digit1};
+use nom::{IResult, branch::alt, bytes::complete::{tag, take_while, take_while1}, character::{complete::digit1, is_alphabetic, is_alphanumeric}};
 
-use crate::token::Token;
+use crate::token::*;
 
 pub struct Tokenizer {
     pub code: str
@@ -11,9 +11,58 @@ impl Tokenizer {
         let mut tokens: Vec<Token> = vec![];
         let mut code = &self.code;
         while code != "" {
+            match Tokenizer::reserved(code) {
+                Ok((input, reserved)) => {
+                    code = input;
+                    tokens.push(Token {
+                        kind: TokenKind::RESERVED,
+                        num: 0,
+                        str: reserved.to_string()
+                    });
 
+                    continue;
+                },
+                Err(_) => {},
+            }
+
+            match Tokenizer::number(code) {
+                Ok((input, number)) => {
+                    code = input;
+                    tokens.push(Token { 
+                        kind: TokenKind::NUMBER, 
+                        num: number, 
+                        str: String::default()
+                    });
+                    continue;
+                },
+                Err(_) => {},
+            }
+
+            match Tokenizer::ident(code) {
+                Ok((input, ident)) => {
+                    code = input;
+                    tokens.push(Token {
+                        kind: TokenKind::IDENT,
+                        num: 0,
+                        str: ident.to_string()
+                    });
+
+                    continue;
+                },
+                Err(_) => {},
+            }
+
+            break;
         }
-        vec![]
+        tokens
+    }
+
+    fn is_ident(ch: char) -> bool {
+        is_alphabetic(ch as u8)
+    }
+
+    fn ident(input: &str) -> IResult<&str, &str> {
+        take_while1(Tokenizer::is_ident)(input)
     }
 
     fn number(input: &str) -> IResult<&str, usize> {
