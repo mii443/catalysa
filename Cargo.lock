@@ -5,6 +5,9 @@ version = 3
 [[package]]
 name = "catalysa"
 version = "0.1.0"
+dependencies = [
+ "catalysa-parser",
+]
 
 [[package]]
 name = "catalysa-parser"

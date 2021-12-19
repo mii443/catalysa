@@ -3,21 +3,25 @@ use nom::{IResult, branch::alt, bytes::complete::{tag, take_while, take_while1},
 use crate::token::*;
 
 pub struct Tokenizer {
-    pub code: str
+    pub code: String
 }
 
 impl Tokenizer {
     pub fn tokenize(&mut self) -> Vec<Token> {
         let mut tokens: Vec<Token> = vec![];
-        let mut code = &self.code;
+        let mut code = self.code.as_str();
         while code != "" {
+            {
+                if Tokenizer::is_whitespace(code.chars().next().unwrap()) {
+                    code = &code[1..];
+                }
+            }
+
             match Tokenizer::reserved(code) {
                 Ok((input, reserved)) => {
                     code = input;
-                    tokens.push(Token {
-                        kind: TokenKind::RESERVED,
-                        num: 0,
-                        str: reserved.to_string()
+                    tokens.push(Token::Reserved {
+                        text: reserved.to_string()
                     });
 
                     continue;
@@ -28,10 +32,8 @@ impl Tokenizer {
             match Tokenizer::number(code) {
                 Ok((input, number)) => {
                     code = input;
-                    tokens.push(Token { 
-                        kind: TokenKind::NUMBER, 
-                        num: number, 
-                        str: String::default()
+                    tokens.push(Token::Number { 
+                        number: number
                     });
                     continue;
                 },
@@ -41,10 +43,8 @@ impl Tokenizer {
             match Tokenizer::ident(code) {
                 Ok((input, ident)) => {
                     code = input;
-                    tokens.push(Token {
-                        kind: TokenKind::IDENT,
-                        num: 0,
-                        str: ident.to_string()
+                    tokens.push(Token::Ident {
+                        text: ident.to_string()
                     });
 
                     continue;
@@ -55,6 +55,10 @@ impl Tokenizer {
             break;
         }
         tokens
+    }
+
+    fn is_whitespace(ch: char) -> bool {
+        ch == '\t' || ch == '\n' || ch == ' ' || ch == '\r'
     }
 
     fn is_ident(ch: char) -> bool {
@@ -118,6 +122,22 @@ impl Tokenizer {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tokenize_test() {
+        let mut tokenizer = Tokenizer {
+            code: "1 + 2 abc".to_string()
+        };
+        assert_eq!(
+            tokenizer.tokenize(), 
+            vec![
+                Token::Number { number: 1 },
+                Token::Reserved { text: "+".to_string() },
+                Token::Number { number: 2 },
+                Token::Ident { text: "abc".to_string() }
+                ]
+            )
+    }
 
     #[test]
     fn reserved_test() {

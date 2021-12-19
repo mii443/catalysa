@@ -1,3 +1,9 @@
+use catalysa_parser::tokenizer::Tokenizer;
+
 fn main() {
-    println!("Hello, world!");
+    let mut tokenizer = Tokenizer {
+        code: "1 + 2;".to_string()
+    };
+
+    println!("{:?}", tokenizer.tokenize());
 }

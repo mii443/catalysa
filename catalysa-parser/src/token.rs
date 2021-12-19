@@ -1,14 +1,15 @@
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum TokenKind {
-    RESERVED,
-    NUMBER,
-    IDENT,
-    TEXT,
-}
-
-#[derive(Clone, Debug)]
-pub struct Token {
-    pub kind: TokenKind,
-    pub num: usize,
-    pub str: String
+#[derive(Clone, Debug, PartialEq)]
+pub enum Token {
+    Reserved {
+        text: String
+    },
+    Number {
+        number: usize
+    },
+    Ident {
+        text: String
+    },
+    Text {
+        text: String
+    },
 }
