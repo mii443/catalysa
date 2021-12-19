@@ -1,4 +1,4 @@
-use nom::{IResult, branch::alt, bytes::complete::tag};
+use nom::{IResult, branch::alt, bytes::complete::tag, character::complete::digit1};
 
 use crate::token::Token;
 
@@ -14,6 +14,11 @@ impl Tokenizer {
 
         }
         vec![]
+    }
+
+    fn number(input: &str) -> IResult<&str, usize> {
+        let (input, digit) = digit1(input)?;
+        Ok((input, digit.parse::<usize>().unwrap()))
     }
 
     fn reserved(input: &str) -> IResult<&str, &str> {
