@@ -3,7 +3,7 @@ options { tokenVocab = CatalysaLexer; }
 
 catalysa_file: program*;
 
-program: if
+program: if_grammar
     | f_call
     | function
     | expr
@@ -16,7 +16,7 @@ f_call: IDENT LPAREN (program COMMA?)* RPAREN ;
 block: LCURL program* RCURL ;
 function: F IDENT LPAREN ( IDENT COMMA? )* RPAREN ARROW program ;
 let: LET IDENT (EQ program)? ;
-if: IF relational program (ELSE program)* ;
+if_grammar: IF relational program (ELSE program)* ;
 
 expr: assign | relational ;
 assign: IDENT EQ relational ;
@@ -24,7 +24,7 @@ relational: add (LE add | LT add | BE add | BT add | EQEQ add | NE add | CONJ ad
 add: mul (ADD mul | SUB mul | SUB_ASSIGNMENT mul | ADD_ASSIGNMENT mul)* ;
 mul: unary (MUL unary | DIV unary | DIV_ASSIGNMENT unary | MUL_ASSIGNMENT unary)* ;
 
-primary: LPAREN expr RPAREN | IDENT | TEXT | function_call  | NUM ;
+primary: LPAREN expr RPAREN | IDENT | TEXT | f_call  | NUM ;
 function_call: IDENT LPAREN (unary COMMA?)* RPAREN ;
 
 unary: ADD primary
